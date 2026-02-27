@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Simples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculadora {
+            background-color: #2c3e50;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 320px;
+        }
+
+        .display {
+            background-color: #34495e;
+            color: white;
+            font-size: 2.5rem;
+            text-align: right;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            width: 100%;
+            outline: none;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .display::placeholder {
+            color: #95a5a6;
+        }
+
+        .botoes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #3d566e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .operador {
+            background-color: #f39c12;
+            color: #2c3e50;
+        }
+
+        .operador:hover {
+            background-color: #e67e22;
+        }
+
+        .igual {
+            background-color: #27ae60;
+            color: white;
+            grid-row: span 2;
+        }
+
+        .igual:hover {
+            background-color: #2ecc71;
+        }
+
+        .limpar {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .limpar:hover {
+            background-color: #c0392b;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculadora">
+        <input type="text" class="display" id="display" readonly placeholder="0">
+        
+        <div class="botoes">
+            <button onclick="limpar()" class="limpar">C</button>
+            <button onclick="apagar()" class="limpar">⌫</button>
+            <button onclick="adicionarOperador('%')" class="operador">%</button>
+            <button onclick="adicionarOperador('/')" class="operador">÷</button>
+            
+            <button onclick="adicionarNumero('7')">7</button>
+            <button onclick="adicionarNumero('8')">8</button>
+            <button onclick="adicionarNumero('9')">9</button>
+            <button onclick="adicionarOperador('*')" class="operador">×</button>
+            
+            <button onclick="adicionarNumero('4')">4</button>
+            <button onclick="adicionarNumero('5')">5</button>
+            <button onclick="adicionarNumero('6')">6</button>
+            <button onclick="adicionarOperador('-')" class="operador">−</button>
+            
+            <button onclick="adicionarNumero('1')">1</button>
+            <button onclick="adicionarNumero('2')">2</button>
+            <button onclick="adicionarNumero('3')">3</button>
+            <button onclick="adicionarOperador('+')" class="operador">+</button>
+            
+            <button onclick="adicionarNumero('0')" class="zero">0</button>
+            <button onclick="adicionarNumero('.')">.</button>
+            <button onclick="calcular()" class="igual">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        let expressao = '';
+
+        function adicionarNumero(numero) {
+            expressao += numero;
+            display.value = expressao;
+        }
+
+        function adicionarOperador(operador) {
+            // Verifica se o último caractere não é um operador
+            if (expressao.length > 0 && !isOperador(expressao[expressao.length - 1])) {
+                expressao += operador;
+                display.value = expressao;
+            } else if (expressao.length === 0 && operador !== '%') {
+                // Se estiver vazio e não for porcentagem, adiciona 0 antes do operador
+                expressao = '0' + operador;
+                display.value = expressao;
+            }
+        }
+
+        function isOperador(char) {
+            return ['+', '-', '*', '/', '%'].includes(char);
+        }
+
+        function limpar() {
+            expressao = '';
+            display.value = '';
+        }
+
+        function apagar() {
+            expressao = expressao.slice(0, -1);
+            display.value = expressao;
+        }
+
+        function calcular() {
+            if (expressao.length === 0) return;
+
+            try {
+                // Prepara a expressão para avaliação
+                let expressaoCalculo = expressao;
+                
+                // Substitui símbolos visuais pelos operadores JavaScript
+                expressaoCalculo = expressaoCalculo.replace(/×/g, '*');
+                
+                // Trata a porcentagem
+                if (expressaoCalculo.includes('%')) {
+                    // Divide a expressão em partes
+                    let partes = expressaoCalculo.split(/([+\-*/])/);
+                    
+                    for (let i = 0; i < partes.length; i++) {
+                        if (partes[i].includes('%')) {
+                            let numero = parseFloat(partes[i].replace('%', ''));
+                            
+                            // Se for o primeiro número ou se for uma porcentagem de um número
+                            if (i === 0 || !partes[i-1] || partes[i-1] === '') {
+                                partes[i] = (numero / 100).toString();
+                            } else {
+                                // Encontra o número anterior
+                                let indexAnterior = i-2;
+                                while (indexAnterior >= 0 && isOperador(partes[indexAnterior])) {
+                                    indexAnterior--;
+                                }
+                                if (indexAnterior >= 0) {
+                                    let numeroBase = parseFloat(partes[indexAnterior]);
+                                    partes[i] = (numeroBase * numero / 100).toString();
+                                } else {
+                                    partes[i] = (numero / 100).toString();
+                                }
+                            }
+                        }
+                    }
+                    
+                    expressaoCalculo = partes.join('');
+                }
+                
+                // Avalia a expressão com segurança
+                let resultado = Function('"use strict";return (' + expressaoCalculo + ')')();
+                
+                // Arredonda para evitar problemas de precisão
+                resultado = Math.round(resultado * 1000000) / 1000000;
+                
+                display.value = resultado;
+                expressao = resultado.toString();
+            } catch (error) {
+                display.value = 'Erro';
+                expressao = '';
+            }
+        }
+    </script>
+</body>
+</html>
